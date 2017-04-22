@@ -14,7 +14,10 @@ def build_parser():
     parser = argparse.ArgumentParser(description=DESCRIPTION + ADDITIONAL_INFORMATION, add_help=False)
     # Read a line before printing help so we can include additional options
     parser.add_argument('--help', action='store_true', help='Show help output')
+    parser.add_argument('--or', action='store_true', help='Read specification of json from this file rather than guessing. If this file does not exist create it. This protects one against format changes causing crashes.')
+
     parser.add_argument('--spec-file', type=str, help='Read specification of json from this file rather than guessing. If this file does not exist create it. This protects one against format changes causing crashes.')
+    parser.add_argument('--args-file', type=str, help='In addition to the command line arguments, read arguments from this this file. Dynamically update filtering as this file is updated')
     return parser
 
 class FormatGuesser(object):
@@ -59,6 +62,8 @@ def main():
     parser = build_parser()
     args, _ = parser.parse_known_args()
 
+    args_file = args.args_file
+
     guesser = FormatGuesser(parser, sys.argv)
     if args.spec_file is not None:
         guesser.set_spec_file(args.spec_file)
@@ -70,25 +75,59 @@ def main():
         if line == '':
             break
         record = json.loads(line)
-        args = guesser.set_record(record)
+
+        guesser.set_record(record)
+
+        conditions = parse_conditions(guesser.parser, sys.argv[1:])
+        if args_file:
+            # This could be made more performant
+            #   using either inotify or stat
+            with open(args_file) as stream:
+                conditions = parse_conditions(guesser.parser, sys.argv[1:] + stream.read().replace('\n', ' ').split())
 
         if args.help:
             guesser.attempt_show_help()
 
-        if filter_record(args, record):
+        if filter_record(conditions, record):
             print json.dumps(record)
 
-    guesser.parser.print_help()
+    if args.help:
+        guesser.parser.print_help()
 
-def filter_record(args, record):
+def parse_conditions(parser, arguments):
+    parts = list(list_split('--or', arguments))
+    return map(parser.parse_args, parts)
+
+def list_split(sep, lst):
+    if not lst:
+        yield lst
+        return
+
+    while lst:
+        if sep in lst:
+            index = lst.index(sep)
+            yield lst[:index]
+            lst = lst[index + 1:]
+        else:
+            yield lst
+            break
+
+
+def filter_record(conditions, record):
+    for condition in conditions:
+        if filter_condition(condition, record):
+            return True
+    else:
+        return False
+
+def filter_condition(condition, record):
     for key in record:
-        regular_expression = getattr(args, key + '_regexp', None)
+        regular_expression = getattr(condition, key + '_regexp', None)
         if (regular_expression is not None and
                 not re.match(regular_expression, str(record[key]))):
             return False
     else:
         return True
-
 
 def add_specific_options(parser, keys):
     "Add options specific to this json format"
