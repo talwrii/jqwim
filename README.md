@@ -23,6 +23,32 @@ jqwim --help < /dev/null
 
 ```
 
+# Usage
+
+```
+usage: make-readme.py [--help] [--or] [--spec-file SPEC_FILE]
+                      [--args-file ARGS_FILE]
+
+A limited alternative to jq with a simpler interface.The command line options
+depend upon your data source (or --spec-file). Provide sample data when
+running --help to see source specific options.
+
+optional arguments:
+  --help                Show help output
+  --or                  Read specification of json from this file rather than
+                        guessing. If this file does not exist create it. This
+                        protects one against format changes causing crashes.
+  --spec-file SPEC_FILE
+                        Read specification of json from this file rather than
+                        guessing. If this file does not exist create it. This
+                        protects one against format changes causing crashes.
+  --args-file ARGS_FILE
+                        In addition to the command line arguments, read
+                        arguments from this this file. Dynamically update
+                        filtering as this file is updated
+
+```
+
 # WARNING: Non-homogenous data
 
 The approach used here may be a little surprising.
@@ -34,29 +60,13 @@ For settings where strict correctness is important, for example unsupervised run
 This options specifies a json file that contains a list of acceptable keys.
 When use the first time this file is built from the first key.
 
-# Usage
 
-```
-usage: make-readme.py [--help] [--spec-file SPEC_FILE]
-
-A limited alternative to jq with a simpler interface.The command line options
-depend upon your data source (or --spec-file). Provide sample data when
-running --help to see source specific options.
-
-optional arguments:
-  --help                Show help output
-  --spec-file SPEC_FILE
-                        Read specification of json from this file rather than
-                        guessing. If this file does not exist create it. This
-                        protects one against format changes causing crashes.
-
-```
 
 # Prior work
 
-`jq` is a highly recommeded tool. It provides a *domain specific language* for filtering and transforming `JSON`, for easy use cases it can be rather verbose, however.
+*jq* is a highly recommeded tool. It provides a *domain specific language* for filtering and transforming *JSON*. For easy use cases it can be rather verbose, however.
 
-`recordstream` is a similar tool to `jq`. For each of learning and easy turning-completeness (I imagine), it uses perl fragments for filtering. This is a complicated trade-off.
+*recordstream* is a similar tool to *jq*. For both learning and turning-completeness (I imagine), it uses perl fragments for filtering. This has some disadvantages.
 
 There are a number of similar young projects on github.
 None of these fit my use cases.
