@@ -39,8 +39,6 @@ For settings where strict correctness is important, for example unsupervised run
 This options specifies a json file that contains a list of acceptable keys.
 When use the first time this file is built from the first key.
 
-
-
 # Prior work
 
 *jq* is a highly recommeded tool. It provides a *domain specific language* for filtering and transforming *JSON*. For easy use cases it can be rather verbose, however.
@@ -52,3 +50,11 @@ None of these fit my use cases.
 Understandably, lots of these tools are "code dumps" without documentation which can make quickly working out what they do difficult.
 There may be other tools that provide very similar functionaly.
 Some examples include [jsongrep](https://github.com/terrycojones/jsongrep), [jsongrep](https://github.com/dsc/jsongrep), [jqwim](https://github.com/jsonlines/jqwim), [jku](https://github.com/bjorne/jku).
+
+# Dynamic update of filters
+
+The `--args-file` (analogous to the `-f` option for grep) allows you to load your filters from a file.
+This file contains a list of command line flags.
+In addition, these options will be reloaded if this file changes.
+This is useful if you need to change your filters regularly.
+Care should be taken to avoid sync-update race conditions however.
