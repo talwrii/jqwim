@@ -124,7 +124,7 @@ def filter_condition(condition, record):
     for key in record:
         regular_expression = getattr(condition, key + '_regexp', None)
         if (regular_expression is not None and
-                not re.match(regular_expression, str(record[key]))):
+                not re.search(regular_expression, str(record[key])), re.I):
             return False
     else:
         return True
